@@ -43,11 +43,21 @@ def clean_string(input_string: str, keep_backspace: bool=False, keep_bell: bool=
     return ''.join(displayed_string[:cursor_position])
 
 
-def clean_file(input_filepath: str, output_filepath: str, keep_backspace: bool=False, keep_bell: bool=False) -> None:
+def clean_file(input_filepath: str, keep_backspace: bool=False, keep_bell: bool=False) -> None:
     print(f'[*] Cleaning: { input_filepath }...')
     
+    output_filepath: str
+    ext: str
+    output_filepath, ext = os.path.splitext(input_filepath)
+    
+    # Prevent re-cleaning an already cleaned file
+    if output_filepath.endswith('_cleaned'):
+        return
+    
+    output_filepath = f'{ output_filepath }_cleaned{ ext }'
+    
     with open(input_filepath, 'r', encoding='utf-8') as in_file:
-        with open(output_filepath, 'w') as out_file:
+        with open(output_filepath, 'w', encoding='utf-8') as out_file:
             line: str
             for line in in_file.readlines():
                 out_file.write(clean_string(line, keep_backspace, keep_bell))
@@ -65,11 +75,14 @@ if __name__ == '__main__':
     if len(args.filepaths) > 0:
         input_filepath: str
         for input_filepath in args.filepaths:
-            output_filepath: str
-            ext: str
-            output_filepath, ext = os.path.splitext(input_filepath)
-            output_filepath = f'{ output_filepath }_cleaned{ ext }'
             
-            clean_file(input_filepath, output_filepath, args.keep_backspace, args.keep_bell)
+            if os.path.isdir(input_filepath):
+                for root, dirs, files in os.walk(input_filepath):
+                    for name in files:
+                        clean_file(os.path.join(root, name), args.keep_backspace, args.keep_bell)
+            elif os.path.isfile(input_filepath):
+                clean_file(input_filepath, args.keep_backspace, args.keep_bell)
+            else:
+                print(f'[-] ERROR: "{ input_filepath }" does not exist')
     else:
         parser.print_help(sys.stderr)
