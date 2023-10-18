@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import re
 import sys
@@ -57,7 +56,7 @@ def clean_file(input_filepath: str, keep_backspace: bool=False, keep_bell: bool=
     output_filepath = f'{ output_filepath }_cleaned{ ext }'
     
     # Read data without specifying an encoding
-    with open(input_filepath, 'r') as in_file:
+    with open(input_filepath, 'r', encoding='utf-8', errors='ignore') as in_file:
         # Force the output data to be UTF-8 encoded
         # NOTE: This should prevent exceptions from decoding errors while silently dropping un-decodable characters
         with open(output_filepath, 'w', encoding='utf-8') as out_file:
